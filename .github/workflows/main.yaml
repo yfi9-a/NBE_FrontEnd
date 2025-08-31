@@ -3,7 +3,8 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - prd   
+      - prd
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -11,6 +12,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Log in to DockerHub
         uses: docker/login-action@v2
@@ -23,6 +27,12 @@ jobs:
         with:
           context: .
           push: true
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=yfi9a/nbe-frontend:cache
+          cache-to: type=registry,ref=yfi9a/nbe-frontend:cache,mode=max
           tags: |
             yfi9a/nbe-frontend:latest
             yfi9a/nbe-frontend:${{ github.sha }}
+
+      - name: Verify Image
+        run: docker pull yfi9a/nbe-frontend:latest
