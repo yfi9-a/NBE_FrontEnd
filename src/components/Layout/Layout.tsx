@@ -1,14 +1,46 @@
-import { Outlet } from "react-router-dom";
-import { useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 
 export default function Layout() {
   const [currentStep, setCurrentStep] = useState(1);
+  const location = useLocation();
+
+  const prevStepRef = useRef<number>(1);
+
+  useEffect(() => {
+    const pathToStep: Record<string, number> = {
+      "/": 1,
+      "/validation": 1,
+      "/step2": 2,
+      "/step3": 3,
+      "/step4": 4,
+      "/step5": 5,
+    };
+    const nextStep = pathToStep[location.pathname] || 1;
+
+    // If navigating backward, clear data for the step we just left (cancel filled part)
+    if (nextStep < prevStepRef.current) {
+      const prevStepKey = `step${prevStepRef.current}`;
+      sessionStorage.removeItem(prevStepKey);
+    }
+
+    setCurrentStep(nextStep);
+    prevStepRef.current = nextStep;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
   const steps = [
     "ادخال الرقم القومي والهاتف المحمول",
     "التحقق من البريد الالكتروني",
-    "تحديد موعد الحضور",
-    "تحديد الخدمة المطلوبة",
+    "تحديد الخدمة و موعد الحضور",
     "تحديد الفرع الأقرب لك",
     "ادخال البيانات المطلوبة",
     "تأكيد الحجز",
@@ -26,11 +58,8 @@ export default function Layout() {
         <div className="w-full max-w-xs hidden md:block">
           {steps.map((step, index) => (
             <div key={index} className="flex items-center mb-4" dir="rtl">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center p-1 mr-3 
-                ${currentStep > index + 1 ? "bg-orange-400" : "border-2 border-white"}`}
-              >
-                {currentStep > index + 1 ? (
+              {currentStep > index + 1 ? (
+                <div className="w-8 h-8 rounded-full flex items-center justify-center p-1 mr-3 bg-orange-400">
                   <svg
                     className="w-5 h-5 text-white"
                     fill="none"
@@ -44,10 +73,10 @@ export default function Layout() {
                       d="M5 13l4 4L19 7"
                     ></path>
                   </svg>
-                ) : (
-                  <span className="text-white font-bold"></span>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="mr-3" />
+              )}
               <p
                 className={`text-lg mx-2 ${
                   currentStep > index + 1
@@ -75,7 +104,7 @@ export default function Layout() {
       </div>
 
       {/* Main Content */}
-      <div className="w-full md:w-2/3 bg-white p-8 md:p-16 md:pt-32 rounded-r-[50px] flex flex-col relative min-h-screen">
+      <div className="w-full md:w-2/3 bg-white p-0 rounded-r-[50px] flex flex-col relative min-h-screen">
         <Outlet /> {/* هنا بيتعرض محتوى كل Route */}
       </div>
     </div>

@@ -13,7 +13,9 @@ export default function Validation() {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otpTimer, setOtpTimer] = useState(180); // 3 minutes
   const [isResendingOtp, setIsResendingOtp] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpVerified, setOtpVerified] = useState(false);
+  
 
   useEffect(() => {
     let timerId: NodeJS.Timeout;
@@ -28,7 +30,9 @@ export default function Validation() {
   }, [showOtpInput, otpTimer]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
+    const updated = { ...user, [e.target.name]: e.target.value };
+    setUser(updated);
+    sessionStorage.setItem("step1", JSON.stringify(updated));
   };
 
   const schema = joi.object({
@@ -105,7 +109,8 @@ export default function Validation() {
   };
 
   const handleVerifyOtp = () => {
-    setCurrentStep(2); // Move to step 2
+    if (!otpCode.trim()) return;
+    setOtpVerified(true);
   };
 
   const formatTime = (seconds: number) => {
@@ -122,8 +127,26 @@ export default function Validation() {
     <div className="flex flex-col md:flex-row min-h-screen">
     
       {/* Main Content */}
-      <div className="w-full md:w-2/3 bg-white p-8 md:p-16 md:pt-32 rounded-r-[50px] flex flex-col justify-center items-center md:items-end relative min-h-screen pb-8 md:rounded-t-[50px] md:items-center">
-        <div className="w-full max-w-md">
+      <div className="w-full h-full flex-1 flex flex-col justify-start items-end relative">
+        <div className="w-full ml-auto px-6 pt-10 md:pt-[15vh] text-right max-w-[500px]" dir="rtl">
+          {otpVerified ? (
+            <div className="w-full flex items-center justify-center">
+              <div className="mt-8 p-5 border border-green-300 rounded-lg shadow bg-white text-center">
+                <div className="flex items-center justify-center gap-2 text-green-700 mb-3">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <h4 className="font-semibold">تم التحقق من الرمز بنجاح</h4>
+                </div>
+                <div className="flex justify-center">
+                  <button type="button" className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-6 py-2 shadow" onClick={() => navigate("/step2")}>
+                    متابعة
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
           <form onSubmit={handleSubmit}>
             {serverError && (
               <div className="text-red-500 text-sm text-right mb-4">
@@ -136,7 +159,7 @@ export default function Validation() {
               <div className="relative border-2 border-orange-400 rounded-md focus-within:ring-2 focus-within:ring-orange-500">
                 <label
                   htmlFor="national_id"
-                  className="absolute -top-3 right-4 bg-white px-2 text-sm text-sky-950"
+                  className="absolute -top-3 right-4 bg-white px-2 text-base text-sky-950"
                 >
                   الرقم القومي
                 </label>
@@ -147,7 +170,7 @@ export default function Validation() {
                   placeholder="ادخل الرقم القومي"
                   value={user.national_id}
                   onChange={handleChange}
-                  className="w-full p-3 pt-5 bg-transparent outline-none placeholder:text-right text-right"
+                  className="w-full py-3 px-3 pt-5 bg-transparent outline-none placeholder:text-right text-right text-base"
                 />
               </div>
               {errors.national_id?.map((msg, i) => (
@@ -165,7 +188,7 @@ export default function Validation() {
               <div className="relative border-2 border-orange-400 rounded-md focus-within:ring-2 focus-within:ring-orange-500">
                 <label
                   htmlFor="phone"
-                  className="absolute -top-3 right-4 bg-white px-2 text-sm text-sky-950"
+                  className="absolute -top-3 right-4 bg-white px-2 text-base text-sky-950"
                 >
                   رقم الهاتف المحمول
                 </label>
@@ -176,7 +199,7 @@ export default function Validation() {
                   placeholder="ادخل الهاتف المحمول"
                   value={user.phone}
                   onChange={handleChange}
-                  className="w-full p-3 pt-5 bg-transparent outline-none placeholder:text-right text-right"
+                  className="w-full py-3 px-3 pt-5 bg-transparent outline-none placeholder:text-right text-right text-base"
                 />
               </div>
               {errors.phone?.map((msg, i) => (
@@ -216,12 +239,12 @@ export default function Validation() {
               className="mt-8 p-4 border border-orange-400 rounded-lg shadow-lg bg-white"
               dir="rtl"
             >
-              <p className="text-sm text-gray-700 mb-4 text-center">
+              <p className="text-base text-gray-700 mb-4">
                 رجاء العلم بإنه سوف يصلكم رسالة OTP على رقم الهاتف المحمول الذي تم
                 إدخاله للتحقق. هذه الرسالة سرية جدا برجاء عدم مشاركتها مع احد.
                 للاستمرار اضغط تأكيد
               </p>
-              <div className="flex justify-center gap-4">
+              <div className="flex  gap-4">
                 <button
                   type="button"
                   className="px-6 py-2 bg-orange-400 text-white rounded-md text-sm hover:bg-orange-500"
@@ -246,88 +269,77 @@ export default function Validation() {
               className="mt-8 p-4 border border-orange-400 rounded-lg shadow-lg bg-white"
               dir="rtl"
             >
-              <p className="text-sm text-gray-700 mb-4 text-center">
-                الرجاء إدخال رمز التحقق الذي وصلك على هاتفك المحمول.
-              </p>
-              <div className="flex flex-col items-center gap-4">
-                <input
-                  type="text"
-                  placeholder="رمز التحقق"
-                  className="w-full max-w-xs p-3 border-2 border-orange-400 rounded-md text-center text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <div className="text-sm text-gray-600">
-                  الوقت المتبقي: {formatTime(otpTimer)}
-                </div>
-                <div className="flex justify-center gap-4">
-                  <button
-                    type="button"
-                    className={`px-6 py-2 text-white rounded-md text-sm transition-colors
-                      ${
-                        otpTimer === 0 && !isResendingOtp
-                          ? "bg-orange-400 hover:bg-orange-500"
-                          : "bg-gray-400 cursor-not-allowed"
-                      }`}
-                    onClick={handleResendOtp}
-                    disabled={otpTimer > 0 || isResendingOtp}
-                  >
-                    إعادة إرسال الرمز
-                  </button>
-                  <button
-                    type="button"
-                    className="px-6 py-2 bg-orange-400 text-white rounded-md text-sm hover:bg-orange-500"
-                    onClick={handleVerifyOtp}
-                  >
-                    تحقق
-                  </button>
-                </div>
+              {!otpVerified && (
+                <p className="text-base text-gray-700 mb-4 text-right">
+                  الرجاء إدخال رمز التحقق الذي وصلك على هاتفك المحمول.
+                </p>
+              )}
+              <div className="flex flex-col items-end gap-4 w-full">
+                {otpVerified ? (
+                  <></>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      placeholder="ادخل رمز التحقق"
+                      className="w-full self-end p-3 border-2 border-orange-400 rounded-md text-right text-base focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                    <div className="flex  gap-3 w-full self-end">
+                      <span className="text-sm text-gray-600 self-center">
+                        الوقت المتبقي: {formatTime(otpTimer)}
+                      </span>
+                      <button
+                        type="button"
+                        className={`px-5 py-2 text-white rounded-md text-sm transition-colors ${
+                          otpTimer === 0 && !isResendingOtp
+                            ? "bg-orange-400 hover:bg-orange-500"
+                            : "bg-gray-400 cursor-not-allowed"
+                        }`}
+                        onClick={handleResendOtp}
+                        disabled={otpTimer > 0 || isResendingOtp}
+                      >
+                        إعادة الإرسال
+                      </button>
+                      <button
+                        type="button"
+                        className={`px-6 py-2 text-white rounded-md text-sm transition-colors ${
+                          otpCode.trim() ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-300 cursor-not-allowed"
+                        }`}
+                        onClick={handleVerifyOtp}
+                        disabled={!otpCode.trim()}
+                      >
+                        تحقق
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
+          </>
+          )}
         </div>
 
-        {/* Navigation Arrows */}
-        <div className="relative flex justify-center gap-16 md:absolute md:bottom-8 md:left-16 md:static md:w-full md:justify-center md:mt-8">
-          <button
-            type="button"
-            className="bg-orange-400 hover:bg-orange-500 rounded-full w-12 h-12 flex justify-center items-center transition-colors"
-            onClick={() => navigate(-1)}
-            aria-label="Previous"
-          >
-            <svg
-              className="w-6 h-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        
+        {/* Corner Navigation Buttons */}
+        {!otpVerified && (
+          <div className="pointer-events-none">
+            <button
+              type="button"
+              className="pointer-events-auto absolute bottom-2 right-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-6 py-3 flex items-center gap-2 transition-colors shadow-md"
+              onClick={() => navigate("/step2")}
+              aria-label="التالي"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 19l-7-7 7-7"
-              ></path>
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="bg-orange-400 hover:bg-orange-500 rounded-full w-12 h-12 flex justify-center items-center transition-colors"
-            onClick={() => handleSubmit()}
-            aria-label="Next"
-          >
-            <svg
-              className="w-6 h-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 5l7 7-7 7"
-              ></path>
-            </svg>
-          </button>
-        </div>
+              <span>التالي</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       </div>
