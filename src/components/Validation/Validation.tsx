@@ -11,9 +11,9 @@ export default function Validation() {
   const [serverError, setServerError] = useState("");
   const [showOtpConfirmation, setShowOtpConfirmation] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(180); // 3 minutes in seconds
+  const [otpTimer, setOtpTimer] = useState(180); // 3 minutes
   const [isResendingOtp, setIsResendingOtp] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1); // New state for tracking current step
+  const [currentStep, setCurrentStep] = useState(1);
 
   useEffect(() => {
     let timerId: NodeJS.Timeout;
@@ -22,7 +22,7 @@ export default function Validation() {
         setOtpTimer((prevTime) => prevTime - 1);
       }, 1000);
     } else if (otpTimer === 0) {
-      setIsResendingOtp(false); // Enable resend button when timer runs out
+      setIsResendingOtp(false);
     }
     return () => clearInterval(timerId);
   }, [showOtpInput, otpTimer]);
@@ -66,8 +66,8 @@ export default function Validation() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     const { error } = schema.validate(user, { abortEarly: false });
 
     if (error) {
@@ -78,83 +78,50 @@ export default function Validation() {
         grouped[field].push(d.message);
       });
       setErrors(grouped);
-      setShowOtpConfirmation(false); // Hide confirmation if validation fails
-      setShowOtpInput(false); // Hide OTP input if validation fails
+      setShowOtpConfirmation(false);
+      setShowOtpInput(false);
     } else {
       setErrors({});
       registerUser();
-      setShowOtpConfirmation(true); // Show confirmation on successful validation
-      setShowOtpInput(false); // Hide OTP input initially
+      setShowOtpConfirmation(true);
+      setShowOtpInput(false);
     }
   };
 
   const handleConfirmOtp = () => {
     setShowOtpConfirmation(false);
     setShowOtpInput(true);
-    setOtpTimer(180); // Reset timer
-    setIsResendingOtp(false); // Enable resend button
+    setOtpTimer(180);
+    setIsResendingOtp(false);
   };
-
 
   const handleResendOtp = () => {
     setIsResendingOtp(true);
-    // Simulate API call to resend OTP
     setTimeout(() => {
-      setOtpTimer(180); // Reset timer
+      setOtpTimer(180);
       setIsResendingOtp(false);
       alert("تم إعادة إرسال رمز التحقق.");
     }, 2000);
   };
 
   const handleVerifyOtp = () => {
-    setCurrentStep(2); // Move to step 2 after successful initial validation
+    setCurrentStep(2); // Move to step 2
   };
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
   };
 
-  const steps = [
-    "ادخال الرقم القومي والهاتف المحمول",
-    "التحقق من البريد الالكتروني",
-    "تحديد موعد الحضور",
-    "تحديد الخدمة المطلوبة",
-    "تحديد الفرع الأقرب لك",
-    "ادخال البيانات المطلوبة",
-    "تأكيد الحجز",
-  ];
+
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
-      <div className="w-full md:w-1/3 bg-[#006633] h-48 md:h-auto flex flex-col justify-center items-center p-4 text-white text-center">
-        <h2 className="text-3xl font-bold mb-8" dir="rtl">مرحبا بك في البنك الأهلي المصري</h2>
-        {/* Desktop/Tablet View: Show all steps */}
-        <div className="w-full max-w-xs hidden md:block">
-          {steps.map((step, index) => (
-            <div key={index} className="flex items-center mb-4" dir="rtl">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center p-1 mr-3 
-                ${currentStep > index + 1 ? 'bg-orange-400' : 'border-2 border-white'}`}>
-                {currentStep > index + 1 ? (
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                ) : (
-                  <span className="text-white font-bold"></span>
-                )}
-              </div>
-              <p className={`text-lg mx-2 ${currentStep > index + 1 ? 'text-orange-400 font-semibold' : 'text-white'}`}>{step}</p>
-            </div>
-          ))}
-        </div>
-        {/* Mobile View: Show only current step */}
-        <div className="w-full max-w-xs md:hidden">
-          <div className="flex items-center mb-4" dir="rtl">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-orange-400 hidden`}>
-              <span className="text-white font-bold">{currentStep}</span>
-            </div>
-            <p className="text-lg text-white font-semibold">{steps[currentStep - 1]}</p>
-          </div>
-        </div>
-      </div>
+    
+      {/* Main Content */}
       <div className="w-full md:w-2/3 bg-white p-8 md:p-16 md:pt-32 rounded-r-[50px] flex flex-col justify-center items-center md:items-end relative min-h-screen pb-8 md:rounded-t-[50px] md:items-center">
         <div className="w-full max-w-md">
           <form onSubmit={handleSubmit}>
@@ -164,6 +131,7 @@ export default function Validation() {
               </div>
             )}
 
+            {/* National ID */}
             <div className="relative mb-8">
               <div className="relative border-2 border-orange-400 rounded-md focus-within:ring-2 focus-within:ring-orange-500">
                 <label
@@ -183,12 +151,16 @@ export default function Validation() {
                 />
               </div>
               {errors.national_id?.map((msg, i) => (
-                <div key={i} className="absolute bottom-[-20px] right-0 text-red-500 text-sm text-right">
+                <div
+                  key={i}
+                  className="absolute bottom-[-20px] right-0 text-red-500 text-sm text-right"
+                >
                   {msg}
                 </div>
               ))}
             </div>
 
+            {/* Phone */}
             <div className="relative mb-8">
               <div className="relative border-2 border-orange-400 rounded-md focus-within:ring-2 focus-within:ring-orange-500">
                 <label
@@ -208,88 +180,112 @@ export default function Validation() {
                 />
               </div>
               {errors.phone?.map((msg, i) => (
-                <div key={i} className="absolute bottom-[-20px] right-0 text-red-500 text-sm text-right">
+                <div
+                  key={i}
+                  className="absolute bottom-[-20px] right-0 text-red-500 text-sm text-right"
+                >
                   {msg}
                 </div>
               ))}
             </div>
 
+            {/* Submit */}
             <div className="mt-8 text-center">
               <button
                 type="submit"
                 className={`w-full px-6 py-3 text-white text-lg font-bold 
                  rounded-md shadow-md transform 
                  hover:scale-105 transition-all duration-300
-                 ${showOtpConfirmation || showOtpInput ? 'bg-gray-400' : 'bg-orange-400 hover:bg-orange-500'}`}
-                disabled={showOtpConfirmation || showOtpInput} // Disable when OTP confirmation or OTP input is shown
+                 ${
+                   showOtpConfirmation || showOtpInput
+                     ? "bg-gray-400"
+                     : "bg-orange-400 hover:bg-orange-500"
+                 }`}
+                disabled={showOtpConfirmation || showOtpInput}
               >
-                {showOtpConfirmation || showOtpInput ? 'جاري المعالجة ..' : 'تنفيذ'}
+                {showOtpConfirmation || showOtpInput
+                  ? "جاري المعالجة .."
+                  : "تنفيذ"}
               </button>
             </div>
+          </form>
 
-            {showOtpConfirmation && (
-              <div className="mt-8 p-4 border border-orange-400 rounded-lg shadow-lg bg-white" dir="rtl">
-                <p className="text-sm text-gray-700 mb-4 text-center">
-                  رجاء العلم بإنه سوف يصلكم رسالة OTP على رقم الهاتف المحمول الذي تم 
-                  إدخاله للتحقق . هذه الرسالة سرية جدا برجاء عدم مشاركتها مع احد. للاستمرار اضغط تأكيد
-                </p>
+          {/* OTP Confirmation */}
+          {showOtpConfirmation && (
+            <div
+              className="mt-8 p-4 border border-orange-400 rounded-lg shadow-lg bg-white"
+              dir="rtl"
+            >
+              <p className="text-sm text-gray-700 mb-4 text-center">
+                رجاء العلم بإنه سوف يصلكم رسالة OTP على رقم الهاتف المحمول الذي تم
+                إدخاله للتحقق. هذه الرسالة سرية جدا برجاء عدم مشاركتها مع احد.
+                للاستمرار اضغط تأكيد
+              </p>
+              <div className="flex justify-center gap-4">
+                <button
+                  type="button"
+                  className="px-6 py-2 bg-orange-400 text-white rounded-md text-sm hover:bg-orange-500"
+                  onClick={handleConfirmOtp}
+                >
+                  تأكيد
+                </button>
+                <button
+                  type="button"
+                  className="px-6 py-2 bg-gray-400 text-white rounded-md text-sm hover:bg-gray-500"
+                  onClick={() => setShowOtpConfirmation(false)}
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* OTP Input */}
+          {showOtpInput && (
+            <div
+              className="mt-8 p-4 border border-orange-400 rounded-lg shadow-lg bg-white"
+              dir="rtl"
+            >
+              <p className="text-sm text-gray-700 mb-4 text-center">
+                الرجاء إدخال رمز التحقق الذي وصلك على هاتفك المحمول.
+              </p>
+              <div className="flex flex-col items-center gap-4">
+                <input
+                  type="text"
+                  placeholder="رمز التحقق"
+                  className="w-full max-w-xs p-3 border-2 border-orange-400 rounded-md text-center text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                <div className="text-sm text-gray-600">
+                  الوقت المتبقي: {formatTime(otpTimer)}
+                </div>
                 <div className="flex justify-center gap-4">
                   <button
                     type="button"
-                    className="px-6 py-2 bg-orange-400 text-white rounded-md text-sm hover:bg-orange-500"
-                    onClick={handleConfirmOtp}
+                    className={`px-6 py-2 text-white rounded-md text-sm transition-colors
+                      ${
+                        otpTimer === 0 && !isResendingOtp
+                          ? "bg-orange-400 hover:bg-orange-500"
+                          : "bg-gray-400 cursor-not-allowed"
+                      }`}
+                    onClick={handleResendOtp}
+                    disabled={otpTimer > 0 || isResendingOtp}
                   >
-                    تأكيد
+                    إعادة إرسال الرمز
                   </button>
                   <button
                     type="button"
-                    className="px-6 py-2 bg-gray-400 text-white rounded-md text-sm hover:bg-gray-500"
-                    onClick={() => setShowOtpConfirmation(false)}
+                    className="px-6 py-2 bg-orange-400 text-white rounded-md text-sm hover:bg-orange-500"
+                    onClick={handleVerifyOtp}
                   >
-                    إلغاء
+                    تحقق
                   </button>
                 </div>
               </div>
-            )}
-
-            {showOtpInput && (
-              <div className="mt-8 p-4 border border-orange-400 rounded-lg shadow-lg bg-white" dir="rtl">
-                <p className="text-sm text-gray-700 mb-4 text-center">
-                  الرجاء إدخال رمز التحقق الذي وصلك على هاتفك المحمول.
-                </p>
-                <div className="flex flex-col items-center gap-4">
-                  <input
-                    type="text"
-                    placeholder="رمز التحقق"
-                    className="w-full max-w-xs p-3 border-2 border-orange-400 rounded-md text-center text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                  <div className="text-sm text-gray-600">
-                    الوقت المتبقي: {formatTime(otpTimer)}
-                  </div>
-                  <div className="flex justify-center gap-4">
-                    <button
-                      type="button"
-                      className={`px-6 py-2 text-white rounded-md text-sm transition-colors
-                        ${otpTimer === 0 && !isResendingOtp ? 'bg-orange-400 hover:bg-orange-500' : 'bg-gray-400 cursor-not-allowed'}`}
-                      onClick={handleResendOtp}
-                      disabled={otpTimer > 0 || isResendingOtp}
-                    >
-                      إعادة إرسال الرمز
-                    </button>
-                    <button
-                      type="button"
-                      className="px-6 py-2 bg-orange-400 text-white rounded-md text-sm hover:bg-orange-500"
-                      onClick={handleVerifyOtp}
-                    >
-                      تحقق
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </form>
+            </div>
+          )}
         </div>
 
+        {/* Navigation Arrows */}
         <div className="relative flex justify-center gap-16 md:absolute md:bottom-8 md:left-16 md:static md:w-full md:justify-center md:mt-8">
           <button
             type="button"
@@ -297,18 +293,44 @@ export default function Validation() {
             onClick={() => navigate(-1)}
             aria-label="Previous"
           >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15 19l-7-7 7-7"
+              ></path>
+            </svg>
           </button>
           <button
-            type="submit"
+            type="button"
             className="bg-orange-400 hover:bg-orange-500 rounded-full w-12 h-12 flex justify-center items-center transition-colors"
-            onClick={handleSubmit}
+            onClick={() => handleSubmit()}
             aria-label="Next"
           >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 5l7 7-7 7"
+              ></path>
+            </svg>
           </button>
         </div>
       </div>
-    </div>
+
+      </div>
+   
   );
 }
