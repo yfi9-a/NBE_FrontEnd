@@ -93,7 +93,7 @@ export default function Step2() {
 
   return (
     <div className="w-full h-full flex-1 flex flex-col justify-start items-end relative">
-      <div className="w-full ml-auto px-6 md:px-10 pt-6 md:pt-[15vh] text-right max-w-[500px]" dir="rtl">
+      <div className="w-full ml-auto px-6 pt-10 md:pt-[15vh] text-right max-w-[500px] pb-24 md:pb-6" dir="rtl">
         {otpVerified ? (
           <div className="w-full flex items-center justify-center">
             <div className="mt-8 p-5 border border-green-300 rounded-lg shadow bg-white text-center">
@@ -194,7 +194,8 @@ export default function Step2() {
 
             {/* OTP Input */}
             {showOtpInput && (
-              <div className="mt-8 p-4 border border-orange-400 rounded-lg shadow-lg bg-white" dir="rtl">
+              <div 
+              className="mt-8 p-4 border border-orange-400 rounded-lg shadow-lg bg-white" dir="rtl">
                 {!otpVerified && (
                   <p className="text-base text-gray-700 mb-4 text-right">الرجاء إدخال رمز التحقق الذي وصلك على بريدك الالكتروني.</p>
                 )}
@@ -232,7 +233,7 @@ export default function Step2() {
                   </div>
                 </div>
               </div>
-            )}
+            )}  
           </>
         )}
       </div>
@@ -240,32 +241,34 @@ export default function Step2() {
       {/* Corner Navigation Buttons */}
       {!otpVerified && (
         <div className="pointer-events-none">
-          <button
-            type="button"
-            className="pointer-events-auto absolute bottom-2 left-2 bg-gray-200 hover:bg-gray-300 text-sky-950 rounded-lg px-5 py-3 flex items-center gap-2 transition-colors shadow-sm"
-            onClick={() => {
-              if (window.confirm("بالرجوع سيتم فقدان البيانات المُدخلة في هذه الخطوة. هل تريد المتابعة؟")) {
-                navigate(-1);
-              }
-            }}
-            aria-label="السابق"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-            <span>السابق</span>
-          </button>
-          <button
-            type="button"
-            className="pointer-events-auto absolute bottom-2 right-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-6 py-3 flex items-center gap-2 transition-colors shadow-md"
-            onClick={() => navigate("/step3")}
-            aria-label="التالي"
-          >
-            <span>التالي</span>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </button>
+          <div className="pointer-events-auto fixed bottom-2 left-1/2 -translate-x-1/2 md:absolute md:bottom-4 md:left-4 md:translate-x-0 flex items-center gap-6 z-40">
+            <button
+              type="button"
+              className="group bg-gray-200 hover:bg-gray-300 text-sky-950 w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-md relative"
+              onClick={() => {
+                if (window.confirm("بالرجوع سيتم فقدان البيانات المُدخلة في هذه الخطوة. هل تريد المتابعة؟")) {
+                  navigate(-1);
+                }
+              }}
+              aria-label="السابق"
+            >
+              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">السابق</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="group bg-orange-500 hover:bg-orange-600 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-md relative"
+              onClick={() => navigate("/step3")}
+              aria-label="التالي"
+            >
+              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">التالي</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
         </div>
       )}
     </div>

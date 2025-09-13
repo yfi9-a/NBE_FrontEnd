@@ -1,3 +1,31 @@
-body {
-  font-family: 'Cairo', 'Roboto', sans-serif;
+@font-face {
+  font-family: 'GE SS';
+  src: local('GE SS'), local('GE_SS'), local('GE SS Two'), local('GESSTwo'),
+       url('./assets/fonts/alfont_com_GE-SS-Two-Medium.otf') format('opentype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Digits Calibri';
+  src: local('Calibri'), url('./assets/fonts/calibri.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0030-0039, U+0660-0669; /* 0-9 and Arabic-Indic digits */
+}
+
+body, input, button, select, textarea {
+  font-family: 'Digits Calibri', 'GE SS', 'Cairo', 'Roboto', sans-serif;
+}
+
+@keyframes introScaleFade {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.intro-anim {
+  animation: introScaleFade 1.2s ease-out forwards;
 }
